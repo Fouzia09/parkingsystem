@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -58,13 +59,16 @@ public class ParkingDataBaseIT {
 	}
 
 	@Test
+	@DisplayName("Entrée d'une voiture")
 	public void testParkingACar() {
+		// GIVEN
 		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 		parkingService.processIncomingVehicle();
-		// TODO: check that a ticket is actually saved in DB and Parking table is
-		// updated with availability
+
+		// WHEN
 		Ticket ticketFromDB = ticketDAO.getTicket("ABCDEF");
 
+		// THEN
 		assertNotEquals(null, ticketFromDB);
 		assertEquals("ABCDEF", ticketFromDB.getVehicleRegNumber());
 		assertEquals(ParkingType.CAR, ticketFromDB.getParkingSpot().getParkingType());
@@ -74,20 +78,24 @@ public class ParkingDataBaseIT {
 	}
 
 	@Test
+	@DisplayName("Sortie d'une voiture, enregistrement des infos en BD")
 	public void testParkingLotExit() {
+		// GIVEN
 		testParkingACar();
 		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 		parkingService.processExitingVehicle();
-		// TODO: check that the fare generated and out time are populated correctly in
-		// the database
+
+		// WHEN
 		Ticket ticket = ticketDAO.getTicket("ABCDEF");
+
+		// THEN
 		assertNotEquals(0, ticket.getPrice());
 		assertNotEquals(0, ticket.getOutTime());
 	}
 
 	@Test
-
-	public void testRecurrentUserReductionMessage() throws Exception {
+	@DisplayName("Sortie d'une voiture pour un user reccurent")
+	public void testParkingLotExitCarRecurrentUser() throws Exception {
 		// GIVEN
 		when(inputReaderUtil.readSelection()).thenReturn(1);
 		when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF2");
@@ -100,6 +108,24 @@ public class ParkingDataBaseIT {
 
 		// THEN
 		boolean result = ticketDAO.isReccurentUser("ABCDEF2");
+		assertTrue(result);
+	}
+
+	@Test
+	@DisplayName("Sortie d'un vélo pour un user reccurent")
+	public void testParkingLotExitBikeRecurrentUser() throws Exception {
+		// GIVEN
+		when(inputReaderUtil.readSelection()).thenReturn(1);
+		when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF2D");
+		ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+		parkingType = ParkingType.BIKE;
+		parkingSpotDAO.getNextAvailableSlot(parkingType);
+
+		// WHEN
+		parkingService.processIncomingVehicle();
+
+		// THEN
+		boolean result = ticketDAO.isReccurentUser("ABCDEF2D");
 		assertTrue(result);
 	}
 

@@ -108,6 +108,7 @@ public class FareCalculatorServiceTest {
 	@DisplayName("Erreur temps quand le temps de sortie est null")
 	@Test
 	public void calculateFareCarWithTimeIsNull() {
+		// GIVEN
 		Date inTime = new Date();
 		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
 		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
@@ -115,12 +116,15 @@ public class FareCalculatorServiceTest {
 		ticket.setInTime(inTime);
 		ticket.setOutTime(null);
 		ticket.setParkingSpot(parkingSpot);
+
+		// THEN
 		assertThrows(NullPointerException.class, () -> fareCalculatorService.calculateFare(ticket, false));
 	}
 
 	@DisplayName("Throw exception quand le type de parking est null")
 	@Test
 	public void calculateFareCarWithNullParkingType() {
+		// GIVEN
 		Date inTime = new Date();
 		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
 		Date outTime = new Date();
@@ -129,12 +133,14 @@ public class FareCalculatorServiceTest {
 		ticket.setInTime(inTime);
 		ticket.setOutTime(outTime);
 		ticket.setParkingSpot(parkingSpot);
+		// THEN
 		assertThrows(NullPointerException.class, () -> fareCalculatorService.calculateFare(ticket, false));
 	}
 
 	@DisplayName("Throw exception quand le type de parking est inconnu")
 	@Test
 	public void calculateFareCarWithUnknownParkingType() {
+		// GIVEN
 		Date inTime = new Date();
 		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
 		Date outTime = new Date();
@@ -143,6 +149,7 @@ public class FareCalculatorServiceTest {
 		ticket.setInTime(inTime);
 		ticket.setOutTime(outTime);
 		ticket.setParkingSpot(parkingSpot);
+		// THEN
 		assertThrows(IllegalArgumentException.class, () -> fareCalculatorService.calculateFare(ticket, false));
 
 	}
@@ -253,10 +260,10 @@ public class FareCalculatorServiceTest {
 	}
 
 	@Test
-	@DisplayName("Stationnement recurrent user pour une voiture")
-	public void calculateFareCarForRecurrentUsers() {
-		// TODO: check that the fare generated has a discount of 5% --> DONE
+	@DisplayName("Stationnement pour un recurrent user pour une voiture")
+	public void calculateFareCarForRecurrentUsersCar() {
 
+		// GIVEN
 		Date inTime = new Date();
 		double discount = 1.43;
 		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
@@ -264,12 +271,84 @@ public class FareCalculatorServiceTest {
 		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
 
 		ticket.setDiscount(discount);
-
 		ticket.setInTime(inTime);
 		ticket.setOutTime(outTime);
 		ticket.setParkingSpot(parkingSpot);
-		fareCalculatorService.calculateFare(ticket, true); // Boolean isRecurrentUser equals to true
-															// gives a discount of 5% (1-0.05=0.95)
+
+		// WHEN
+		fareCalculatorService.calculateFare(ticket, true);
+
+		// THEN
 		assertEquals(1 * Fare.CAR_RATE_PER_HOUR * 0.95, ticket.getPrice());
 	}
+
+	@Test
+	@DisplayName("Stationnement pour un recurrent user pour une vélo")
+	public void calculateFareCarForRecurrentUsersBike() {
+
+		// GIVEN
+		Date inTime = new Date();
+		double discount = 0.95;
+		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
+		Date outTime = new Date();
+		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+		ticket.setDiscount(discount);
+		ticket.setInTime(inTime);
+		ticket.setOutTime(outTime);
+		ticket.setParkingSpot(parkingSpot);
+
+		// WHEN
+		fareCalculatorService.calculateFare(ticket, true);
+
+		// THEN
+		assertEquals(1 * Fare.BIKE_RATE_PER_HOUR * 0.95, ticket.getPrice());
+	}
+
+	@Test
+	@DisplayName("Stationnement pour un non recurrent user pour une voiture")
+	public void calculateFareCarForRecurrentUsersCarFalse() {
+
+		// GIVEN
+		Date inTime = new Date();
+		double discount = 0.95;
+		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
+		Date outTime = new Date();
+		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
+		ticket.setDiscount(discount);
+		ticket.setInTime(inTime);
+		ticket.setOutTime(outTime);
+		ticket.setParkingSpot(parkingSpot);
+
+		// WHEN
+		fareCalculatorService.calculateFare(ticket, false);
+
+		// THEN
+		assertEquals(1 * Fare.CAR_RATE_PER_HOUR, ticket.getPrice());
+	}
+
+	@Test
+	@DisplayName("Stationnement pour un non recurrent user pour une vélo")
+	public void calculateFareCarForRecurrentUsersBikeFalse() {
+
+		// GIVEN
+		Date inTime = new Date();
+		double discount = 0.95;
+		inTime.setTime(System.currentTimeMillis() - (60 * 60 * 1000));
+		Date outTime = new Date();
+		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
+		ticket.setDiscount(discount);
+		ticket.setInTime(inTime);
+		ticket.setOutTime(outTime);
+		ticket.setParkingSpot(parkingSpot);
+
+		// WHEN
+		fareCalculatorService.calculateFare(ticket, false);
+
+		// THEN
+		assertEquals(1 * Fare.BIKE_RATE_PER_HOUR, ticket.getPrice());
+	}
+
 }

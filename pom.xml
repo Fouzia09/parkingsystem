@@ -140,7 +140,30 @@
                     </execution>
                 </executions>
             </plugin>
+                <plugin>
+      <!-- FindBugs Plugin looks for bugs in Java programs. It is based on 
+        the concept of bug patterns. -->
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>findbugs-maven-plugin</artifactId>
+      <version>3.0.0</version>
+    </plugin>
         </plugins>
     </build>
+      <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.6</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>report-only</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
